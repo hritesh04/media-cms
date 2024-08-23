@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hritesh04/news-system/internal/core/services"
 	"github.com/hritesh04/news-system/internal/handlers"
+	"github.com/hritesh04/news-system/internal/migrations"
 	"github.com/hritesh04/news-system/internal/repositories"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -23,11 +24,12 @@ func main() {
 	if err != nil {
 		panic("DB connection failed")
 	}
+	migrations.InitCmsMigrate(db)
 	cmsRepository := repositories.NewCms(db)
 	cmsService := services.NewCmsService(cmsRepository)
 	cmsHandler := handlers.NewCmsHandler(cmsService)
 
 	router := gin.New()
-	router.GET("/ping", cmsHandler.Ping)
+	router.POST("/signup", cmsHandler.SignUp)
 	router.Run(":8080")
 }

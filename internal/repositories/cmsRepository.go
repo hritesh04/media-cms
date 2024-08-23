@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/hritesh04/news-system/internal/core/domain"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,10 @@ func NewCms(db *gorm.DB) *cmsRepository {
 	}
 }
 
-func (r *cmsRepository) AddUser() {
-
+func (r *cmsRepository) InsertUser(user *domain.User) (*domain.User, error) {
+	result := r.DB.Create(&user)
+	if err := result.Error; err != nil {
+		return &domain.User{}, err
+	}
+	return user, nil
 }

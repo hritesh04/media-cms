@@ -1,9 +1,14 @@
 package ports
 
+import (
+	"github.com/hritesh04/news-system/internal/core/domain"
+	"github.com/hritesh04/news-system/internal/core/dto"
+)
+
 type CmsRepository interface {
-	AddUser()
+	InsertUser(*domain.User) (*domain.User, error)
 }
 
 type CmsService interface {
-	AddUser()
+	CreateUser(dto.SignUpRequest) (*domain.User, error)
 }
