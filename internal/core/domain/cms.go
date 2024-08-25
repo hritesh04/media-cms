@@ -45,5 +45,5 @@ type Subscription struct {
 type Category struct {
 	ID       uint `gorm:"primaryKey"`
 	Name     string
-	Articles []Article `gorm:"foreginKey:ID"`
+	Articles []Article `gorm:"foreignKey:CategoryID"`
 }

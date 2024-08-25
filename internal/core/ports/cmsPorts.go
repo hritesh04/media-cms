@@ -7,8 +7,10 @@ import (
 
 type CmsRepository interface {
 	InsertUser(*domain.User) (*domain.User, error)
+	GetUserByEmail(string) (*domain.User, error)
 }
 
 type CmsService interface {
 	CreateUser(dto.SignUpRequest) (*domain.User, error)
+	SignInUser(dto.LogInRequest) (*domain.User, error)
 }

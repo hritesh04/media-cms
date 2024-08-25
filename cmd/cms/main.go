@@ -31,5 +31,6 @@ func main() {
 
 	router := gin.New()
 	router.POST("/signup", cmsHandler.SignUp)
+	router.POST("/login", cmsHandler.Login)
 	router.Run(":8080")
 }

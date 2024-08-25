@@ -6,20 +6,29 @@ import (
 )
 
 type cmsRepository struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 func NewCms(db *gorm.DB) *cmsRepository {
 
 	return &cmsRepository{
-		DB: db,
+		db: db,
 	}
 }
 
 func (r *cmsRepository) InsertUser(user *domain.User) (*domain.User, error) {
-	result := r.DB.Create(&user)
+	result := r.db.Create(&user)
 	if err := result.Error; err != nil {
 		return &domain.User{}, err
 	}
 	return user, nil
+}
+
+func (r *cmsRepository) GetUserByEmail(email string) (*domain.User, error) {
+	var user domain.User
+	result := r.db.First(&user, "email = ?", email)
+	if err := result.Error; err != nil {
+		return &domain.User{}, err
+	}
+	return &user, nil
 }

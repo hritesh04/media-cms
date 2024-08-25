@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"github.com/hritesh04/news-system/internal/core/dto"
@@ -32,4 +34,15 @@ func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
 		return &domain.User{}, err
 	}
 	return newUser, nil
+}
+
+func (s *cmsService) SignInUser(data dto.LogInRequest) (*domain.User, error) {
+	user, err := s.cmsRepository.GetUserByEmail(data.Email)
+	if err != nil {
+		return user, err
+	}
+	if success := auth.ComparePassword(user.Password, data.Password); !success {
+		return &domain.User{}, fmt.Errorf("incorrect password")
+	}
+	return user, nil
 }

@@ -27,7 +27,6 @@ func GenerateToken(id uint, role string) (string, error) {
 		"exp":   time.Now().Add(time.Hour).Unix(),
 		"issue": time.Now().Unix(),
 	})
-	fmt.Println(string(secret))
 	token, err := claims.SignedString(secret)
 	if err != nil {
 		return "", fmt.Errorf("error generating a token")
@@ -43,6 +42,9 @@ func HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
-func ComparePassword(password string) {
-
+func ComparePassword(hash, password string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
+		return false
+	}
+	return true
 }
