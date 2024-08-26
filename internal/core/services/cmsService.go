@@ -7,6 +7,7 @@ import (
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"github.com/hritesh04/news-system/internal/core/dto"
 	"github.com/hritesh04/news-system/internal/core/ports"
+	"github.com/lib/pq"
 )
 
 type cmsService struct {
@@ -19,17 +20,40 @@ func NewCmsService(repository ports.CmsRepository) *cmsService {
 	}
 }
 
+func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
+	user, err := s.cmsRepository.GetUserByID(data.UserId)
+	if err != nil {
+		return &domain.Article{}, err
+	}
+	if user.Type != "AUTHOR" {
+		return &domain.Article{}, fmt.Errorf("user is not an author")
+	}
+	article := &domain.Article{
+		Title:      data.Title,
+		Content:    data.Content,
+		Tags:       pq.StringArray(data.Tags),
+		CategoryID: data.CategoryID,
+		UserID:     data.UserId,
+	}
+	newArticle, err := s.cmsRepository.InsertArticle(article)
+	if err != nil {
+		return &domain.Article{}, nil
+	}
+	return newArticle, nil
+}
+
 func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
 	hash, err := auth.HashPassword(data.Password)
 	if err != nil {
 		return &domain.User{}, err
 	}
-	user := domain.User{
-		Name:     data.Username,
+	user := &domain.User{
+		Name:     data.Name,
 		Password: hash,
+		Type:     domain.AUTHOR,
 		Email:    data.Email,
 	}
-	newUser, err := s.cmsRepository.InsertUser(&user)
+	newUser, err := s.cmsRepository.InsertUser(user)
 	if err != nil {
 		return &domain.User{}, err
 	}

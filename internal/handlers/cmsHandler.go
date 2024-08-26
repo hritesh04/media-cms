@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hritesh04/news-system/internal/auth"
@@ -40,7 +42,7 @@ func (h *cmsHandler) SignUp(g *gin.Context) {
 func (h *cmsHandler) Login(g *gin.Context) {
 	var credentials dto.LogInRequest
 	if err := g.ShouldBindJSON(&credentials); err != nil {
-		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	result, err := h.cmsService.SignInUser(credentials)
 	if err != nil {
@@ -51,5 +53,24 @@ func (h *cmsHandler) Login(g *gin.Context) {
 		helper.ReturnFailed(g, http.StatusInternalServerError, err)
 	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
+	helper.ReturnSuccess(g, http.StatusOK, result)
+}
+
+func (h *cmsHandler) CreateArticle(g *gin.Context) {
+	var article dto.Article
+	if err := g.ShouldBindJSON(&article); err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	userString := g.GetHeader("userID")
+	fmt.Println(userString)
+	userId, err := strconv.ParseUint(userString, 10, 32)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	article.UserId = uint(userId)
+	result, err := h.cmsService.CreateArticle(article)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
 	helper.ReturnSuccess(g, http.StatusOK, result)
 }

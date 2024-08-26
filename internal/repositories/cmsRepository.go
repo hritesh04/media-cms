@@ -16,6 +16,15 @@ func NewCms(db *gorm.DB) *cmsRepository {
 	}
 }
 
+func (r *cmsRepository) GetUserByID(id uint) (*domain.User, error) {
+	user := new(domain.User)
+	result := r.db.First(&user, "id = ?", id)
+	if err := result.Error; err != nil {
+		return user, nil
+	}
+	return user, nil
+}
+
 func (r *cmsRepository) InsertUser(user *domain.User) (*domain.User, error) {
 	result := r.db.Create(&user)
 	if err := result.Error; err != nil {
@@ -25,10 +34,17 @@ func (r *cmsRepository) InsertUser(user *domain.User) (*domain.User, error) {
 }
 
 func (r *cmsRepository) GetUserByEmail(email string) (*domain.User, error) {
-	var user domain.User
-	result := r.db.First(&user, "email = ?", email)
+	user := new(domain.User)
+	result := r.db.Preload("Articles").Preload("Articles.Category").First(&user, "email = ?", email)
 	if err := result.Error; err != nil {
-		return &domain.User{}, err
+		return user, err
 	}
-	return &user, nil
+	return user, nil
+}
+
+func (r *cmsRepository) InsertArticle(article *domain.Article) (*domain.Article, error) {
+	if err := r.db.Create(article).Error; err != nil {
+		return nil, err
+	}
+	return article, nil
 }

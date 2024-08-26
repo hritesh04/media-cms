@@ -1,6 +1,27 @@
 package domain
 
-import "gorm.io/gorm"
+import (
+	"database/sql/driver"
+
+	"github.com/lib/pq"
+	"gorm.io/gorm"
+)
+
+type Role string
+
+const (
+	AUTHOR Role = "AUTHOR"
+	USER   Role = "USER"
+)
+
+func (r *Role) Scan(value string) error {
+	*r = Role(value)
+	return nil
+}
+
+func (r Role) Value() driver.Value {
+	return string(r)
+}
 
 // TODO: add default values
 type User struct {
@@ -8,7 +29,7 @@ type User struct {
 	Name          string
 	Email         string
 	Password      string
-	Type          string
+	Type          Role           `gorm:"type:role"`
 	Articles      []Article      `gorm:"foreignKey:UserID"`
 	Subscriptions []Subscription `gorm:"foreignKey:UserID"`
 }
@@ -17,8 +38,8 @@ type Article struct {
 	gorm.Model
 	Title      string
 	Content    string
-	Tags       []string  `gorm:"type:text[]"`
-	Comments   []Comment `gorm:"foreignKey:ArticleID"`
+	Tags       pq.StringArray `gorm:"type:text[]"`
+	Comments   []Comment      `gorm:"foreignKey:ArticleID"`
 	CategoryID uint
 	Category   Category `gorm:"foreignKey:CategoryID"`
 	UserID     uint

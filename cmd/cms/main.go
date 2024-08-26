@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/services"
 	"github.com/hritesh04/news-system/internal/handlers"
 	"github.com/hritesh04/news-system/internal/migrations"
@@ -32,5 +33,9 @@ func main() {
 	router := gin.New()
 	router.POST("/signup", cmsHandler.SignUp)
 	router.POST("/login", cmsHandler.Login)
+	router.Use(auth.Authorize())
+	articleRouter := router.Group("/article")
+	articleRouter.Use(auth.IsAuthor())
+	articleRouter.POST("/", cmsHandler.CreateArticle)
 	router.Run(":8080")
 }
