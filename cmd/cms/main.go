@@ -37,5 +37,5 @@ func main() {
 	articleRouter := router.Group("/article")
 	articleRouter.Use(auth.IsAuthor())
 	articleRouter.POST("/", cmsHandler.CreateArticle)
-	router.Run(":8080")
+	router.Run(":3000")
 }
