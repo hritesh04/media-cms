@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -62,7 +61,6 @@ func (h *cmsHandler) CreateArticle(g *gin.Context) {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	userString := g.GetHeader("userID")
-	fmt.Println(userString)
 	userId, err := strconv.ParseUint(userString, 10, 32)
 	if err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
@@ -73,4 +71,13 @@ func (h *cmsHandler) CreateArticle(g *gin.Context) {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	helper.ReturnSuccess(g, http.StatusOK, result)
+}
+
+func (h *cmsHandler) GetArticle(g *gin.Context) {
+	articleID := g.Param("articleId")
+	article, err := h.cmsService.GetArticleByID(articleID)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	helper.ReturnSuccess(g, http.StatusOK, article)
 }

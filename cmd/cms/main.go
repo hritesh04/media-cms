@@ -34,6 +34,7 @@ func main() {
 	router.POST("/signup", cmsHandler.SignUp)
 	router.POST("/login", cmsHandler.Login)
 	router.Use(auth.Authorize())
+	router.GET("/:articleId", cmsHandler.GetArticle)
 	articleRouter := router.Group("/article")
 	articleRouter.Use(auth.IsAuthor())
 	articleRouter.POST("/", cmsHandler.CreateArticle)

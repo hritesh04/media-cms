@@ -28,7 +28,6 @@ func init() {
 func IsAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if role := ctx.GetHeader("role"); role == "AUTHOR" {
-			fmt.Println(ctx.Request.Header)
 			ctx.Next()
 			return
 		}
@@ -53,7 +52,6 @@ func Authorize() gin.HandlerFunc {
 		}
 		fmt.Println(claims)
 		if userId, ok := claims["userID"].(string); ok {
-			fmt.Println("Setting user ID:", userId)
 			ctx.Request.Header.Set("userID", userId)
 		} else {
 			helper.ReturnFailed(ctx, http.StatusBadRequest, fmt.Errorf("invalid token: no user ID"))
@@ -61,10 +59,8 @@ func Authorize() gin.HandlerFunc {
 			return
 		}
 		if role, ok := claims["role"].(string); ok {
-			fmt.Println("ROLE")
 			ctx.Request.Header.Set("role", role)
 		}
-		fmt.Println(ctx.Request.Header)
 		ctx.Next()
 	}
 }
