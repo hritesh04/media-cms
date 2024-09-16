@@ -21,13 +21,6 @@ func NewCmsService(repository ports.CmsRepository) *cmsService {
 }
 
 func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
-	// user, err := s.cmsRepository.GetUserByID(data.UserId)
-	// if err != nil {
-	// 	return &domain.Article{}, err
-	// }
-	// if user.Type != "AUTHOR" {
-	// 	return &domain.Article{}, fmt.Errorf("user is not an author")
-	// }
 	article := &domain.Article{
 		Title:      data.Title,
 		Content:    data.Content,
@@ -35,7 +28,6 @@ func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
 		CategoryID: data.CategoryID,
 		UserID:     data.UserId,
 	}
-	fmt.Println(article)
 	newArticle, err := s.cmsRepository.InsertArticle(article)
 	if err != nil {
 		return &domain.Article{}, nil

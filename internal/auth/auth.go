@@ -50,7 +50,6 @@ func Authorize() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		fmt.Println(claims)
 		if userId, ok := claims["userID"].(string); ok {
 			ctx.Request.Header.Set("userID", userId)
 		} else {

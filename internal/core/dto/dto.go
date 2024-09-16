@@ -26,9 +26,9 @@ type LogInRequest struct {
 }
 
 type Article struct {
-	Title      string   `json:title`
-	Content    string   `json:content`
-	Tags       []string `json:tags`
-	CategoryID uint
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	Tags       []string `json:"tags"`
+	CategoryID uint     `json:"category"`
 	UserId     uint
 }
