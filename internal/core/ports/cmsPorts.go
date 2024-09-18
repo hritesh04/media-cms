@@ -6,16 +6,20 @@ import (
 )
 
 type CmsRepository interface {
-	GetUserByID(uint) (*domain.User, error)
+	// GetUserByID(uint) (*domain.User, error)
 	GetUserByEmail(string) (*domain.User, error)
 	InsertUser(*domain.User) (*domain.User, error)
-	InsertArticle(*domain.Article) (*domain.Article, error)
 	GetArticleByID(string) (*domain.Article, error)
+	UpdateArticle(*domain.Article) (*domain.Article, error)
+	InsertArticle(*domain.Article) (*domain.Article, error)
+	RemoveArticle(string) error
 }
 
 type CmsService interface {
-	CreateUser(dto.SignUpRequest) (*domain.User, error)
 	SignInUser(dto.LogInRequest) (*domain.User, error)
-	CreateArticle(dto.Article) (*domain.Article, error)
+	CreateUser(dto.SignUpRequest) (*domain.User, error)
 	GetArticleByID(string) (*domain.Article, error)
+	UpdateArticle(dto.Article) (*domain.Article, error)
+	CreateArticle(dto.Article) (*domain.Article, error)
+	DeleteArticle(string) error
 }

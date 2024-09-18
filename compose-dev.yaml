@@ -7,6 +7,8 @@ services:
     # for production
     # env_file:
     #  - .env
+    volumes:
+      - .:/app
     environment:
       - HOST=db
       - PORT=5432

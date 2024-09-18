@@ -38,5 +38,6 @@ func main() {
 	articleRouter := router.Group("/article")
 	articleRouter.Use(auth.IsAuthor())
 	articleRouter.POST("/", cmsHandler.CreateArticle)
+	articleRouter.PUT("/:articleId", cmsHandler.UpdateArticle)
 	router.Run(":3000")
 }

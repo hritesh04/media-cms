@@ -20,19 +20,15 @@ func NewCmsService(repository ports.CmsRepository) *cmsService {
 	}
 }
 
-func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
-	article := &domain.Article{
-		Title:      data.Title,
-		Content:    data.Content,
-		Tags:       pq.StringArray(data.Tags),
-		CategoryID: data.CategoryID,
-		UserID:     data.UserId,
-	}
-	newArticle, err := s.cmsRepository.InsertArticle(article)
+func (s *cmsService) SignInUser(data dto.LogInRequest) (*domain.User, error) {
+	user, err := s.cmsRepository.GetUserByEmail(data.Email)
 	if err != nil {
-		return &domain.Article{}, nil
+		return user, err
 	}
-	return newArticle, nil
+	if success := auth.ComparePassword(user.Password, data.Password); !success {
+		return &domain.User{}, fmt.Errorf("incorrect password")
+	}
+	return user, nil
 }
 
 func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
@@ -53,17 +49,6 @@ func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
 	return newUser, nil
 }
 
-func (s *cmsService) SignInUser(data dto.LogInRequest) (*domain.User, error) {
-	user, err := s.cmsRepository.GetUserByEmail(data.Email)
-	if err != nil {
-		return user, err
-	}
-	if success := auth.ComparePassword(user.Password, data.Password); !success {
-		return &domain.User{}, fmt.Errorf("incorrect password")
-	}
-	return user, nil
-}
-
 func (s *cmsService) GetArticleByID(id string) (*domain.Article, error) {
 	article, err := s.cmsRepository.GetArticleByID(id)
 
@@ -72,4 +57,38 @@ func (s *cmsService) GetArticleByID(id string) (*domain.Article, error) {
 	}
 
 	return article, nil
+}
+
+func (s *cmsService) UpdateArticle(data dto.Article) (*domain.Article, error) {
+	article := &domain.Article{
+		Title:      data.Title,
+		Content:    data.Content,
+		Tags:       data.Tags,
+		CategoryID: data.CategoryID,
+		UserID:     data.UserId,
+	}
+	updatedArticle, err := s.cmsRepository.UpdateArticle(article)
+	if err != nil {
+		return updatedArticle, err
+	}
+	return updatedArticle, nil
+}
+
+func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
+	article := &domain.Article{
+		Title:      data.Title,
+		Content:    data.Content,
+		Tags:       pq.StringArray(data.Tags),
+		CategoryID: data.CategoryID,
+		UserID:     data.UserId,
+	}
+	newArticle, err := s.cmsRepository.InsertArticle(article)
+	if err != nil {
+		return &domain.Article{}, nil
+	}
+	return newArticle, nil
+}
+
+func (s *cmsService) DeleteArticle(string) error {
+	return nil
 }

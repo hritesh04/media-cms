@@ -10,10 +10,10 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin ./cmd/cms/main.go
 
-FROM scratch
+# FROM scratch
 
-COPY --from=builder /bin/main /bin/main
+# COPY --from=builder /bin/main /bin/main
 
 EXPOSE 3000
 
-CMD ["main"]
+CMD ["/bin/main"]

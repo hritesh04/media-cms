@@ -81,3 +81,15 @@ func (h *cmsHandler) GetArticle(g *gin.Context) {
 	}
 	helper.ReturnSuccess(g, http.StatusOK, article)
 }
+
+func (h *cmsHandler) UpdateArticle(g *gin.Context) {
+	var article dto.Article
+	if err := g.ShouldBindJSON(&article); err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	result, err := h.cmsService.UpdateArticle(article)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	helper.ReturnSuccess(g, http.StatusOK, result)
+}
