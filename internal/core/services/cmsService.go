@@ -2,21 +2,26 @@ package services
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"github.com/hritesh04/news-system/internal/core/dto"
 	"github.com/hritesh04/news-system/internal/core/ports"
+	es "github.com/hritesh04/news-system/package/elastic"
 	"github.com/lib/pq"
+	"github.com/olivere/elastic/v7"
 )
 
 type cmsService struct {
 	cmsRepository ports.CmsRepository
+	elasticClient *es.ElasticClient
 }
 
-func NewCmsService(repository ports.CmsRepository) *cmsService {
+func NewCmsService(repository ports.CmsRepository, elasticClient *es.ElasticClient) *cmsService {
 	return &cmsService{
 		cmsRepository: repository,
+		elasticClient: elasticClient,
 	}
 }
 
@@ -86,9 +91,29 @@ func (s *cmsService) CreateArticle(data dto.Article) (*domain.Article, error) {
 	if err != nil {
 		return &domain.Article{}, nil
 	}
+	_, err = s.elasticClient.Index("article", newArticle)
+	if err != nil {
+		log.Println("Error indexing article in Elasticsearch:", err)
+	}
 	return newArticle, nil
 }
 
-func (s *cmsService) DeleteArticle(string) error {
+func (s *cmsService) DeleteArticle(id string) error {
+	err := s.cmsRepository.RemoveArticle(id)
+	if err != nil {
+		return err
+	}
+	_, err = s.elasticClient.Delete("article", id)
+	if err != nil {
+		log.Println("Error deleting article from Elasticsearch:", err)
+	}
 	return nil
+}
+
+func (s *cmsService) SearchArticle(query string) ([]*elastic.SearchHit, error) {
+	searchResult, err := s.elasticClient.Search("article", elastic.NewMatchQuery("Title", query))
+	if err != nil {
+		return nil, err
+	}
+	return searchResult.Hits.Hits, nil
 }

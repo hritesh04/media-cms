@@ -10,7 +10,6 @@ type cmsRepository struct {
 }
 
 func NewCms(db *gorm.DB) *cmsRepository {
-
 	return &cmsRepository{
 		db: db,
 	}
@@ -71,6 +70,9 @@ func (r *cmsRepository) InsertArticle(article *domain.Article) (*domain.Article,
 	return article, nil
 }
 
-func (r *cmsRepository) RemoveArticle(string) error {
+func (r *cmsRepository) RemoveArticle(id string) error {
+	if err := r.db.Delete(&domain.Article{}, "id = ?", id).Error; err != nil {
+		return err
+	}
 	return nil
 }

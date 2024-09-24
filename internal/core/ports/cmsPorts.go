@@ -3,6 +3,7 @@ package ports
 import (
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"github.com/hritesh04/news-system/internal/core/dto"
+	elastic "github.com/olivere/elastic/v7"
 )
 
 type CmsRepository interface {
@@ -22,4 +23,5 @@ type CmsService interface {
 	UpdateArticle(dto.Article) (*domain.Article, error)
 	CreateArticle(dto.Article) (*domain.Article, error)
 	DeleteArticle(string) error
+	SearchArticle(string) ([]*elastic.SearchHit, error)
 }

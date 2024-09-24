@@ -10,6 +10,7 @@ import (
 	"github.com/hritesh04/news-system/internal/handlers"
 	"github.com/hritesh04/news-system/internal/migrations"
 	"github.com/hritesh04/news-system/internal/repositories"
+	"github.com/hritesh04/news-system/package/elastic"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,14 +28,18 @@ func main() {
 	}
 	migrations.InitCmsMigrate(db)
 	cmsRepository := repositories.NewCms(db)
-	cmsService := services.NewCmsService(cmsRepository)
+	elasticClient := elastic.NewElasticClient(os.Getenv("ELASTICSEARCH_URL"))
+	cmsService := services.NewCmsService(cmsRepository, elasticClient)
 	cmsHandler := handlers.NewCmsHandler(cmsService)
 
 	router := gin.New()
+	router.Use(gin.Logger())
+	router.RedirectTrailingSlash = false
+	router.GET("/search", cmsHandler.SearchArticle)
 	router.POST("/signup", cmsHandler.SignUp)
 	router.POST("/login", cmsHandler.Login)
+	router.GET("/read/:articleId", cmsHandler.GetArticle)
 	router.Use(auth.Authorize())
-	router.GET("/article/:articleId", cmsHandler.GetArticle)
 	articleRouter := router.Group("/article")
 	articleRouter.Use(auth.IsAuthor())
 	articleRouter.POST("/", cmsHandler.CreateArticle)

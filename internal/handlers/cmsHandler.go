@@ -93,3 +93,12 @@ func (h *cmsHandler) UpdateArticle(g *gin.Context) {
 	}
 	helper.ReturnSuccess(g, http.StatusOK, result)
 }
+
+func (h *cmsHandler) SearchArticle(g *gin.Context) {
+	query := g.Query("search")
+	searchResult, err := h.cmsService.SearchArticle(query)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusBadRequest, err)
+	}
+	helper.ReturnSuccess(g, http.StatusOK, searchResult)
+}
