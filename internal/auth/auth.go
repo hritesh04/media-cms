@@ -15,17 +15,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var secret []byte
+type Auth struct {
+	secret []byte
+}
 
-func init() {
+func NewAuthService() *Auth {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Error is occurred  on .env file please check")
 	}
-	secret = []byte(os.Getenv("SECRET"))
+	secret := []byte(os.Getenv("SECRET"))
+	return &Auth{
+		secret: secret,
+	}
 }
 
-func IsAuthor() gin.HandlerFunc {
+func (a *Auth) IsAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if role := ctx.GetHeader("role"); role == "AUTHOR" {
 			ctx.Next()
@@ -36,7 +41,7 @@ func IsAuthor() gin.HandlerFunc {
 	}
 }
 
-func Authorize() gin.HandlerFunc {
+func (a *Auth) Authorize() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString, err := ctx.Cookie("media")
 		if err != nil {
@@ -44,7 +49,7 @@ func Authorize() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		claims, err := ValidateUser(tokenString)
+		claims, err := a.ValidateUser(tokenString)
 		if err != nil {
 			helper.ReturnFailed(ctx, http.StatusBadRequest, err)
 			ctx.Abort()
@@ -64,12 +69,12 @@ func Authorize() gin.HandlerFunc {
 	}
 }
 
-func ValidateUser(tokenString string) (jwt.MapClaims, error) {
+func (a *Auth) ValidateUser(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
-		return secret, nil
+		return a.secret, nil
 	})
 	if err != nil {
 		return jwt.MapClaims{}, nil
@@ -80,21 +85,21 @@ func ValidateUser(tokenString string) (jwt.MapClaims, error) {
 	return jwt.MapClaims{}, fmt.Errorf("token is invalid")
 }
 
-func GenerateToken(id uint, role domain.Role) (string, error) {
+func (a *Auth) GenerateToken(id uint, role domain.Role) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": strconv.FormatUint(uint64(id), 10),
 		"role":   role.Value(),
 		"exp":    time.Now().Add(time.Hour).Unix(),
 		"issue":  time.Now().Unix(),
 	})
-	token, err := claims.SignedString(secret)
+	token, err := claims.SignedString(a.secret)
 	if err != nil {
 		return "", fmt.Errorf("error generating a token")
 	}
 	return token, nil
 }
 
-func HashPassword(password string) (string, error) {
+func (a *Auth) HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("error hashing password : %v", err)
@@ -102,7 +107,7 @@ func HashPassword(password string) (string, error) {
 	return string(hash), nil
 }
 
-func ComparePassword(hash, password string) bool {
+func (a *Auth) ComparePassword(hash, password string) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
 		return false
 	}

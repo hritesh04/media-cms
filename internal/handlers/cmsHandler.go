@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/dto"
 	"github.com/hritesh04/news-system/internal/core/ports"
 	"github.com/hritesh04/news-system/internal/helper"
@@ -13,6 +12,7 @@ import (
 
 type cmsHandler struct {
 	cmsService ports.CmsService
+	auth       ports.AuthService
 }
 
 func NewCmsHandler(service ports.CmsService) *cmsHandler {
@@ -26,16 +26,12 @@ func (h *cmsHandler) SignUp(g *gin.Context) {
 	if err := g.ShouldBindJSON(&user); err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}
-	result, err := h.cmsService.CreateUser(user)
+	token, err := h.cmsService.CreateUser(user)
 	if err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}
-	token, err := auth.GenerateToken(result.ID, result.Type)
-	if err != nil {
-		helper.ReturnFailed(g, http.StatusInternalServerError, err.Error())
-	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
-	helper.ReturnSuccess(g, http.StatusOK, result)
+	helper.ReturnSuccess(g, http.StatusOK, token)
 }
 
 func (h *cmsHandler) Login(g *gin.Context) {
@@ -43,16 +39,12 @@ func (h *cmsHandler) Login(g *gin.Context) {
 	if err := g.ShouldBindJSON(&credentials); err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
-	result, err := h.cmsService.SignInUser(credentials)
+	token, err := h.cmsService.SignInUser(credentials)
 	if err != nil {
 		helper.ReturnFailed(g, http.StatusUnauthorized, err)
 	}
-	token, err := auth.GenerateToken(result.ID, result.Type)
-	if err != nil {
-		helper.ReturnFailed(g, http.StatusInternalServerError, err)
-	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
-	helper.ReturnSuccess(g, http.StatusOK, result)
+	helper.ReturnSuccess(g, http.StatusOK, token)
 }
 
 func (h *cmsHandler) CreateArticle(g *gin.Context) {

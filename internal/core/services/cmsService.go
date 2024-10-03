@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"github.com/hritesh04/news-system/internal/core/dto"
 	"github.com/hritesh04/news-system/internal/core/ports"
@@ -15,31 +14,37 @@ import (
 
 type cmsService struct {
 	cmsRepository ports.CmsRepository
+	Auth          ports.AuthService
 	elasticClient *es.ElasticClient
 }
 
-func NewCmsService(repository ports.CmsRepository, elasticClient *es.ElasticClient) *cmsService {
+func NewCmsService(repository ports.CmsRepository, authService ports.AuthService, elasticClient *es.ElasticClient) *cmsService {
 	return &cmsService{
 		cmsRepository: repository,
+		Auth:          authService,
 		elasticClient: elasticClient,
 	}
 }
 
-func (s *cmsService) SignInUser(data dto.LogInRequest) (*domain.User, error) {
+func (s *cmsService) SignInUser(data dto.LogInRequest) (string, error) {
 	user, err := s.cmsRepository.GetUserByEmail(data.Email)
 	if err != nil {
-		return user, err
+		return "", err
 	}
-	if success := auth.ComparePassword(user.Password, data.Password); !success {
-		return &domain.User{}, fmt.Errorf("incorrect password")
+	if success := s.Auth.ComparePassword(user.Password, data.Password); !success {
+		return "", fmt.Errorf("incorrect password")
 	}
-	return user, nil
+	token, err := s.Auth.GenerateToken(user.ID, user.Type)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
-func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
-	hash, err := auth.HashPassword(data.Password)
+func (s *cmsService) CreateUser(data dto.SignUpRequest) (string, error) {
+	hash, err := s.Auth.HashPassword(data.Password)
 	if err != nil {
-		return &domain.User{}, err
+		return "", err
 	}
 	user := &domain.User{
 		Name:     data.Name,
@@ -49,9 +54,13 @@ func (s *cmsService) CreateUser(data dto.SignUpRequest) (*domain.User, error) {
 	}
 	newUser, err := s.cmsRepository.InsertUser(user)
 	if err != nil {
-		return &domain.User{}, err
+		return "", err
 	}
-	return newUser, nil
+	token, err := s.Auth.GenerateToken(newUser.ID, newUser.Type)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (s *cmsService) GetArticleByID(id string) (*domain.Article, error) {

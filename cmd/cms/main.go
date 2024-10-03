@@ -28,8 +28,9 @@ func main() {
 	}
 	migrations.InitCmsMigrate(db)
 	cmsRepository := repositories.NewCms(db)
+	authService := auth.NewAuthService()
 	elasticClient := elastic.NewElasticClient(os.Getenv("ELASTICSEARCH_URL"))
-	cmsService := services.NewCmsService(cmsRepository, elasticClient)
+	cmsService := services.NewCmsService(cmsRepository, authService, elasticClient)
 	cmsHandler := handlers.NewCmsHandler(cmsService)
 
 	router := gin.New()
@@ -39,9 +40,9 @@ func main() {
 	router.POST("/signup", cmsHandler.SignUp)
 	router.POST("/login", cmsHandler.Login)
 	router.GET("/read/:articleId", cmsHandler.GetArticle)
-	router.Use(auth.Authorize())
+	router.Use(authService.Authorize())
 	articleRouter := router.Group("/article")
-	articleRouter.Use(auth.IsAuthor())
+	articleRouter.Use(authService.IsAuthor())
 	articleRouter.POST("/", cmsHandler.CreateArticle)
 	articleRouter.PUT("/:articleId", cmsHandler.UpdateArticle)
 	router.Run(":3000")

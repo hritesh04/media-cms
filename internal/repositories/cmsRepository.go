@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type cmsRepository struct {
@@ -51,13 +52,19 @@ func (r *cmsRepository) GetArticleByID(id string) (*domain.Article, error) {
 
 func (r *cmsRepository) UpdateArticle(data *domain.Article) (*domain.Article, error) {
 	article := new(domain.Article)
-	if err := r.db.First(&article).Error; err != nil {
-		return article, err
-	}
-	article.Content = data.Content
-	article.Title = data.Title
-	article.Tags = data.Tags
-	if err := r.db.Save(article).Error; err != nil {
+	// if err := r.db.First(&article).Error; err != nil {
+	// 	return article, err
+	// }
+	// article.Content = data.Content
+	// article.Title = data.Title
+	// article.Tags = data.Tags
+	// if err := r.db.Save(article).Error; err != nil {
+	// 	return article, err
+	// }
+
+	// better approach than above since it does less db calls and can return updated data in just one query.
+	err := r.db.Model(article).Clauses(clause.Returning{}).Where("id=?", data.ID).Updates(data).Error
+	if err != nil {
 		return article, err
 	}
 	return article, nil
