@@ -8,31 +8,41 @@ import (
 	elastic "github.com/olivere/elastic/v7"
 )
 
-type CmsRepository interface {
+type UserRepository interface {
 	// GetUserByID(uint) (*domain.User, error)
 	GetUserByEmail(string) (*domain.User, error)
 	InsertUser(*domain.User) (*domain.User, error)
 	GetArticleByID(string) (*domain.Article, error)
+	// UpdateArticle(*domain.Article) (*domain.Article, error)
+	// InsertArticle(*domain.Article) (*domain.Article, error)
+	// RemoveArticle(string) error
+}
+
+type UserService interface {
+	SignInUser(dto.LogInRequest) (string, error)
+	CreateUser(dto.SignUpRequest) (string, error)
+	GetArticleByID(string) (*domain.Article, error)
+	SearchArticle(string) ([]*elastic.SearchHit, error)
+}
+
+type ArticleRepository interface {
+	// GetArticleByID(string) (*domain.Article, error)
 	UpdateArticle(*domain.Article) (*domain.Article, error)
 	InsertArticle(*domain.Article) (*domain.Article, error)
 	RemoveArticle(string) error
 }
 
-type CmsService interface {
-	SignInUser(dto.LogInRequest) (string, error)
-	CreateUser(dto.SignUpRequest) (string, error)
-	GetArticleByID(string) (*domain.Article, error)
+type ArticleService interface {
 	UpdateArticle(dto.Article) (*domain.Article, error)
 	CreateArticle(dto.Article) (*domain.Article, error)
 	DeleteArticle(string) error
-	SearchArticle(string) ([]*elastic.SearchHit, error)
 }
 
 type AuthService interface {
-	IsAuthor() gin.HandlerFunc
 	Authorize() gin.HandlerFunc
-	ValidateUser(string) (jwt.MapClaims, error)
+	IsAuthor() gin.HandlerFunc
 	GenerateToken(uint, domain.Role) (string, error)
+	ValidateUser(string) (jwt.MapClaims, error)
 	HashPassword(string) (string, error)
 	ComparePassword(string, string) bool
 }

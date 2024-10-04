@@ -25,46 +25,46 @@ func (r Role) Value() driver.Value {
 
 // TODO: add default values
 type User struct {
-	gorm.Model
-	Name          string
-	Email         string
-	Password      string
-	Type          Role           `gorm:"type:role"`
-	Articles      []Article      `gorm:"foreignKey:UserID"`
-	Subscriptions []Subscription `gorm:"foreignKey:UserID"`
+	gorm.Model    `json:"-"`
+	Name          string         `json:"name"`
+	Email         string         `json:"email"`
+	Password      string         `json:"password"`
+	Type          Role           `json:"type" gorm:"type:role;default:USER"`
+	Articles      []Article      `json:"articles" gorm:"foreignKey:UserID"`
+	Subscriptions []Subscription `json:"subscriptions" gorm:"foreignKey:UserID"`
 }
 
 type Article struct {
-	gorm.Model
-	Title      string
-	Content    string
-	Tags       pq.StringArray `gorm:"type:text[]"`
-	Comments   []Comment      `gorm:"foreignKey:ArticleID"`
-	CategoryID uint
-	Category   Category `gorm:"foreignKey:CategoryID"`
-	UserID     uint
-	User       User `gorm:"foreignKey:UserID"`
+	gorm.Model `json:"-"`
+	Title      string         `json:"title"`
+	Content    string         `json:"content"`
+	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
+	Comments   []Comment      `json:"comments" gorm:"foreignKey:ArticleID"`
+	CategoryID uint           `json:"category_id"`
+	Category   Category       `json:"category" gorm:"foreignKey:CategoryID"`
+	UserID     uint           `json:"user_id"`
+	User       User           `gorm:"foreignKey:UserID"`
 }
 
 type Comment struct {
-	gorm.Model
-	Content   string
-	ArticleID uint
-	On        Article `gorm:"foreignKey:ArticleID"`
-	UserID    uint
-	By        User `gorm:"foreignKey:UserID"`
+	gorm.Model `json:"-"`
+	Content    string  `json:"content"`
+	ArticleID  uint    `json:"article_id"`
+	On         Article `gorm:"foreignKey:ArticleID"`
+	UserID     uint    `json:"user_id"`
+	By         User    `gorm:"foreignKey:UserID"`
 }
 
 type Subscription struct {
-	gorm.Model
-	CategoryID uint
-	Category   Category `gorm:"foreignKey:CategoryID"`
-	UserID     uint
-	User       User `gorm:"foreignKey:UserID"`
+	gorm.Model `json:"-"`
+	CategoryID uint     `json:"category_id"`
+	Category   Category `json:"category" gorm:"foreignKey:CategoryID"`
+	UserID     uint     `json:"user_id"`
+	User       User     `json:"user" gorm:"foreignKey:UserID"`
 }
 
 type Category struct {
-	ID       uint `gorm:"primaryKey"`
-	Name     string
-	Articles []Article `gorm:"foreignKey:CategoryID"`
+	ID       uint      `json:"id" gorm:"primaryKey"`
+	Name     string    `json:"name"`
+	Articles []Article `json:"articles" gorm:"foreignKey:CategoryID"`
 }
