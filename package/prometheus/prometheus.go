@@ -7,13 +7,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var topics = []string{
-	"article_view_count",
+	"article_views",
 }
 
 type PrometheusClient struct {
@@ -21,10 +23,10 @@ type PrometheusClient struct {
 	Topics map[string]*prometheus.CounterVec
 }
 
-func NewPrometheusClient() *PrometheusClient {
+func NewPrometheusClient(url string) *PrometheusClient {
 	var clientTopics = make(map[string]*prometheus.CounterVec)
 	connection, err := api.NewClient(api.Config{
-		Address: "http://localhost:9090",
+		Address: url,
 	})
 	if err != nil {
 		fmt.Printf("Error creating client: %v\n", err)
@@ -41,6 +43,12 @@ func NewPrometheusClient() *PrometheusClient {
 	return &PrometheusClient{
 		Client: client,
 		Topics: clientTopics,
+	}
+}
+
+func (p *PrometheusClient) Handler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		promhttp.Handler().ServeHTTP(c.Writer, c.Request)
 	}
 }
 

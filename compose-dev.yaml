@@ -10,12 +10,13 @@ services:
     #  - .env
     environment:
       - HOST=db
-      - PORT=5432
+      - DB_PORT=5432
       - USER_NAME=postgres
       - DB_NAME=cms
       - PASSWORD=postgres
       - SECRET=secret
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - PROMETHEUS_URL=http://prometheus:9090
     depends_on:
       db:
         condition: service_healthy
