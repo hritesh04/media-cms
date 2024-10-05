@@ -26,9 +26,22 @@ type LogInRequest struct {
 }
 
 type Article struct {
+	ID         uint     `json:"id"`
 	Title      string   `json:"title"`
 	Content    string   `json:"content"`
 	Tags       []string `json:"tags"`
 	CategoryID uint     `json:"category"`
 	UserId     uint
+}
+
+type Comment struct {
+	Content   string `json:"content"`
+	ArticleID uint   `json:"article_id"`
+	UserID    uint   `json:"user_id"`
+}
+
+type SubscriptionRequest struct {
+	AuthorID   uint `json:"author_id"`
+	CategoryID uint `json:"category_id"`
+	UserID     uint `json:"user_id"`
 }

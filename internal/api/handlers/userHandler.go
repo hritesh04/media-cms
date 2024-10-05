@@ -38,7 +38,7 @@ func (h *handler) SignUp(g *gin.Context) {
 	if err := g.ShouldBindJSON(&user); err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}
-	token, err := h.userService.CreateUser(user)
+	token, err := h.userService.SignUpUser(user)
 	if err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}

@@ -24,7 +24,7 @@ func (r *userRepository) GetUserByEmail(email string) (*domain.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) InsertUser(user *domain.User) (*domain.User, error) {
+func (r *userRepository) CreateUser(user *domain.User) (*domain.User, error) {
 	result := r.db.Create(&user)
 	if err := result.Error; err != nil {
 		return &domain.User{}, err

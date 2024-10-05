@@ -57,6 +57,8 @@ type Comment struct {
 
 type Subscription struct {
 	gorm.Model `json:"-"`
+	AuthorID   uint     `json:"author_id"`
+	Author     User     `json:"author" gorm:"foreignKey:AuthorID"`
 	CategoryID uint     `json:"category_id"`
 	Category   Category `json:"category" gorm:"foreignKey:CategoryID"`
 	UserID     uint     `json:"user_id"`

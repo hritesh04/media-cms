@@ -11,7 +11,7 @@ import (
 type UserRepository interface {
 	// GetUserByID(uint) (*domain.User, error)
 	GetUserByEmail(string) (*domain.User, error)
-	InsertUser(*domain.User) (*domain.User, error)
+	CreateUser(*domain.User) (*domain.User, error)
 	GetArticleByID(string) (*domain.Article, error)
 	// UpdateArticle(*domain.Article) (*domain.Article, error)
 	// InsertArticle(*domain.Article) (*domain.Article, error)
@@ -20,15 +20,29 @@ type UserRepository interface {
 
 type UserService interface {
 	SignInUser(dto.LogInRequest) (string, error)
-	CreateUser(dto.SignUpRequest) (string, error)
+	SignUpUser(dto.SignUpRequest) (string, error)
 	GetArticleByID(string) (*domain.Article, error)
 	SearchArticle(string) ([]*elastic.SearchHit, error)
 }
 
+type UserActionRepository interface {
+	CreateComment(*domain.Comment) (*domain.Comment, error)
+	DeleteComment(string) error
+	AddSubscription(*domain.Subscription) (*domain.Subscription, error)
+	RemoveSubscription(string) error
+}
+
+type UserActionService interface {
+	AddComment(dto.Comment) (*domain.Comment, error)
+	RemoveComment(string) error
+	Subscribe(dto.SubscriptionRequest) (*domain.Subscription, error)
+	UnSubscribe(string) error
+}
+
 type ArticleRepository interface {
 	// GetArticleByID(string) (*domain.Article, error)
-	UpdateArticle(*domain.Article) (*domain.Article, error)
 	InsertArticle(*domain.Article) (*domain.Article, error)
+	UpdateArticle(*domain.Article) (*domain.Article, error)
 	RemoveArticle(string) error
 }
 

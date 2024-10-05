@@ -19,7 +19,7 @@ type articleHandler struct {
 
 func SetupArticleRoutes(rh rest.RestHandler) {
 	articleRepo := repositories.NewArticleRepository(rh.DB)
-	svc := services.NewArticleService(articleRepo, rh.AuthService, rh.ElasticClient)
+	svc := services.NewArticleService(articleRepo, rh.ElasticClient)
 	handler := &articleHandler{
 		articleService: svc,
 	}
@@ -53,6 +53,11 @@ func (h *articleHandler) UpdateArticle(g *gin.Context) {
 	if err := g.ShouldBindJSON(&article); err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
+	articleId, err := strconv.ParseUint(g.Param("articleId"), 10, 32)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusInternalServerError, err)
+	}
+	article.ID = uint(articleId)
 	result, err := h.articleService.UpdateArticle(article)
 	if err != nil {
 		helper.ReturnFailed(g, http.StatusBadRequest, err)

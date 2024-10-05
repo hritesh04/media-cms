@@ -43,7 +43,7 @@ func (s *userService) SignInUser(data dto.LogInRequest) (string, error) {
 	return token, nil
 }
 
-func (s *userService) CreateUser(data dto.SignUpRequest) (string, error) {
+func (s *userService) SignUpUser(data dto.SignUpRequest) (string, error) {
 	hash, err := s.Auth.HashPassword(data.Password)
 	if err != nil {
 		return "", err
@@ -54,7 +54,7 @@ func (s *userService) CreateUser(data dto.SignUpRequest) (string, error) {
 		Type:     domain.AUTHOR,
 		Email:    data.Email,
 	}
-	newUser, err := s.userRepository.InsertUser(user)
+	newUser, err := s.userRepository.CreateUser(user)
 	if err != nil {
 		return "", err
 	}

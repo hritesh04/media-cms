@@ -52,7 +52,7 @@ func setupRoutes(rh rest.RestHandler) {
 	handlers.SetupUserRoutes(rh)
 	rh.Router.Use(rh.AuthService.Authorize())
 	handlers.SetupArticleRoutes(rh)
-	// handlers.SetupCategoryRoutes(rh)
+	handlers.SetupUserActionRoutes(rh)
 	// handlers.SetupCommentRoutes(rh)
 	// handlers.SetupSubscriptionRoutes(rh)
 }

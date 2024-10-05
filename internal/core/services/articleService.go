@@ -12,14 +12,12 @@ import (
 
 type articleService struct {
 	articleRepository ports.ArticleRepository
-	authService       ports.AuthService
 	elasticClient     *es.ElasticClient
 }
 
-func NewArticleService(repository ports.ArticleRepository, authService ports.AuthService, elasticClient *es.ElasticClient) *articleService {
+func NewArticleService(repository ports.ArticleRepository, elasticClient *es.ElasticClient) *articleService {
 	return &articleService{
 		articleRepository: repository,
-		authService:       authService,
 		elasticClient:     elasticClient,
 	}
 }
