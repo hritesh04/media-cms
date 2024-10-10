@@ -32,7 +32,6 @@ func SetupEnv() (cfg AppConfig, err error) {
 
 	Dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", os.Getenv("HOST"), os.Getenv("USER_NAME"), os.Getenv("PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 
-	fmt.Println(Dsn)
 	if len(Dsn) < 1 {
 		return AppConfig{}, errors.New("DSN variables not found")
 	}
