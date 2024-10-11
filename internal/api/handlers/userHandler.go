@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +14,11 @@ import (
 )
 
 type handler struct {
+	logger      *slog.Logger
 	userService ports.UserService
 }
 
-func SetupUserRoutes(rh rest.RestHandler) {
+func SetupUserRoutes(logger *slog.Logger, rh rest.RestHandler) {
 
 	userRepo := repositories.NewUserRepository(rh.DB)
 	svc := services.NewUserService(userRepo, rh.AuthService, rh.ElasticClient, rh.PrometheusClient)
@@ -36,10 +38,12 @@ func SetupUserRoutes(rh rest.RestHandler) {
 func (h *handler) SignUp(g *gin.Context) {
 	var user dto.SignUpRequest
 	if err := g.ShouldBindJSON(&user); err != nil {
+		h.logger.Error("request body parsing", "error", err)
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}
 	token, err := h.userService.SignUpUser(user)
 	if err != nil {
+		h.logger.Error("creating user", "error", err)
 		helper.ReturnFailed(g, http.StatusBadRequest, err.Error())
 	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
@@ -49,10 +53,12 @@ func (h *handler) SignUp(g *gin.Context) {
 func (h *handler) Login(g *gin.Context) {
 	var credentials dto.LogInRequest
 	if err := g.ShouldBindJSON(&credentials); err != nil {
+		h.logger.Error("request body parsing", "error", err)
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	token, err := h.userService.SignInUser(credentials)
 	if err != nil {
+		h.logger.Error("signin user", "error", err)
 		helper.ReturnFailed(g, http.StatusUnauthorized, err)
 	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
@@ -63,6 +69,7 @@ func (h *handler) GetArticleByID(g *gin.Context) {
 	articleID := g.Param("articleId")
 	article, err := h.userService.GetArticleByID(articleID)
 	if err != nil {
+		h.logger.Error("fetching article", "error", err)
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	helper.ReturnSuccess(g, http.StatusOK, article)
@@ -72,6 +79,7 @@ func (h *handler) SearchArticle(g *gin.Context) {
 	query := g.Query("search")
 	searchResult, err := h.userService.SearchArticle(query)
 	if err != nil {
+		h.logger.Error("article search", "error", err)
 		helper.ReturnFailed(g, http.StatusBadRequest, err)
 	}
 	helper.ReturnSuccess(g, http.StatusOK, searchResult)

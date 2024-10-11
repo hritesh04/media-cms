@@ -1,7 +1,7 @@
 package api
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hritesh04/news-system/config"
@@ -9,6 +9,7 @@ import (
 	"github.com/hritesh04/news-system/internal/api/rest"
 	"github.com/hritesh04/news-system/internal/auth"
 	"github.com/hritesh04/news-system/internal/core/domain"
+	"github.com/hritesh04/news-system/internal/logger"
 	"github.com/hritesh04/news-system/package/elastic"
 	"github.com/hritesh04/news-system/package/prometheus"
 	"gorm.io/driver/postgres"
@@ -20,13 +21,15 @@ func StartServer(cfg config.AppConfig) {
 	router := gin.New()
 	router.Use(gin.Logger())
 
+	logger := logger.New("info")
+
 	db, err := gorm.Open(postgres.Open(cfg.Dsn), &gorm.Config{})
 	if err != nil {
-		log.Printf("DB connection failed: %v", err)
-		panic("DB connection failed")
+		logger.Error("DB connection failed", "error", err)
+		panic("")
 	}
 	if err := db.AutoMigrate(&domain.User{}, &domain.Article{}, &domain.Category{}, &domain.Comment{}, &domain.Subscription{}); err != nil {
-		log.Printf("DB migration failed: %v", err)
+		logger.Error("DB migration failed", "error", err)
 	}
 
 	authService := auth.NewAuthService()
@@ -41,18 +44,16 @@ func StartServer(cfg config.AppConfig) {
 		PrometheusClient: prometheusClient,
 	}
 
-	setupRoutes(rh)
+	setupRoutes(logger, rh)
 
 	router.Run(cfg.ServerPort)
 
 }
 
-func setupRoutes(rh rest.RestHandler) {
+func setupRoutes(logger *slog.Logger, rh rest.RestHandler) {
 	rh.Router.GET("/metrics", rh.PrometheusClient.Handler())
-	handlers.SetupUserRoutes(rh)
+	handlers.SetupUserRoutes(logger, rh)
 	rh.Router.Use(rh.AuthService.Authorize())
-	handlers.SetupArticleRoutes(rh)
-	handlers.SetupUserActionRoutes(rh)
-	// handlers.SetupCommentRoutes(rh)
-	// handlers.SetupSubscriptionRoutes(rh)
+	handlers.SetupArticleRoutes(logger, rh)
+	handlers.SetupUserActionRoutes(logger, rh)
 }
