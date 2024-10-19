@@ -51,7 +51,7 @@ func (s *userService) SignUpUser(data dto.SignUpRequest) (string, error) {
 	user := &domain.User{
 		Name:     data.Name,
 		Password: hash,
-		Type:     domain.AUTHOR,
+		Type:     domain.Role(data.Role),
 		Email:    data.Email,
 	}
 	newUser, err := s.userRepository.CreateUser(user)
@@ -65,6 +65,33 @@ func (s *userService) SignUpUser(data dto.SignUpRequest) (string, error) {
 	return token, nil
 }
 
+func (s *userService) GetAllArticle(limit, offset string) (*[]domain.Article, error) {
+	var limitInt int64
+	var offsetInt int64
+	var err error
+	if limit == "" {
+		limitInt = -1
+	} else {
+		limitInt, err = strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if offset == "" {
+		offsetInt = -1
+	} else {
+		offsetInt, err = strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	article, err := s.userRepository.GetAllArticle(int(limitInt), int(offsetInt))
+	if err != nil {
+		return nil, err
+	}
+	return article, nil
+}
+
 func (s *userService) GetArticleByID(id string) (*domain.Article, error) {
 	article, err := s.userRepository.GetArticleByID(id)
 	s.prometheusClient.Increment("article_views", strconv.Itoa(int(article.ID)))
@@ -76,7 +103,7 @@ func (s *userService) GetArticleByID(id string) (*domain.Article, error) {
 }
 
 func (s *userService) SearchArticle(query string) ([]*elastic.SearchHit, error) {
-	searchResult, err := s.elasticClient.Search("article", elastic.NewMatchQuery("Title", query))
+	searchResult, err := s.elasticClient.Search("article", elastic.NewMatchQuery("title", query))
 	if err != nil {
 		return nil, err
 	}

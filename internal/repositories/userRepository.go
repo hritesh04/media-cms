@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"fmt"
+
 	"github.com/hritesh04/news-system/internal/core/domain"
 	"gorm.io/gorm"
 )
@@ -32,14 +34,18 @@ func (r *userRepository) CreateUser(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-// func (r *cmsRepository) GetUserByID(id uint) (*domain.User, error) {
-// 	user := new(domain.User)
-// 	result := r.db.First(&user, "id = ?", id)
-// 	if err := result.Error; err != nil {
-// 		return user, nil
-// 	}
-// 	return user, nil
-// }
+func (r *userRepository) GetAllArticle(limit, offset int) (*[]domain.Article, error) {
+	var articles []domain.Article
+	result := r.db.Limit(limit).Offset(offset).Find(&articles)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, fmt.Errorf("no articles found")
+	}
+	return &articles, nil
+}
 
 func (r *userRepository) GetArticleByID(id string) (*domain.Article, error) {
 	article := new(domain.Article)

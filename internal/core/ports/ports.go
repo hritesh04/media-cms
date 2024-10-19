@@ -9,18 +9,16 @@ import (
 )
 
 type UserRepository interface {
-	// GetUserByID(uint) (*domain.User, error)
 	GetUserByEmail(string) (*domain.User, error)
 	CreateUser(*domain.User) (*domain.User, error)
+	GetAllArticle(int, int) (*[]domain.Article, error)
 	GetArticleByID(string) (*domain.Article, error)
-	// UpdateArticle(*domain.Article) (*domain.Article, error)
-	// InsertArticle(*domain.Article) (*domain.Article, error)
-	// RemoveArticle(string) error
 }
 
 type UserService interface {
 	SignInUser(dto.LogInRequest) (string, error)
 	SignUpUser(dto.SignUpRequest) (string, error)
+	GetAllArticle(string, string) (*[]domain.Article, error)
 	GetArticleByID(string) (*domain.Article, error)
 	SearchArticle(string) ([]*elastic.SearchHit, error)
 }

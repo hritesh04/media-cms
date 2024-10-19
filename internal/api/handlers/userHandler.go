@@ -31,6 +31,7 @@ func SetupUserRoutes(logger *slog.Logger, rh rest.RestHandler) {
 	userGroup.POST("/signup", handler.SignUp)
 	userGroup.POST("/login", handler.Login)
 	userGroup.GET("/search", handler.SearchArticle)
+	userGroup.GET("/article", handler.GetAllArticle)
 	userGroup.GET("/:articleId", handler.GetArticleByID)
 	// userGroup.GET("/profile", rh.GetProfile)
 }
@@ -63,6 +64,16 @@ func (h *handler) Login(g *gin.Context) {
 	}
 	g.SetCookie("media", token, 3600*24, "/", "localhost", false, true)
 	helper.ReturnSuccess(g, http.StatusOK, token)
+}
+
+func (h *handler) GetAllArticle(g *gin.Context) {
+	limit := g.Query("limit")
+	offset := g.Query("offset")
+	articles, err := h.userService.GetAllArticle(limit, offset)
+	if err != nil {
+		helper.ReturnFailed(g, http.StatusInternalServerError, err)
+	}
+	helper.ReturnSuccess(g, http.StatusOK, articles)
 }
 
 func (h *handler) GetArticleByID(g *gin.Context) {
