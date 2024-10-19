@@ -10,8 +10,8 @@ import (
 type Role string
 
 const (
-	AUTHOR Role = "AUTHOR"
-	USER   Role = "USER"
+	AUTHOR Role = "author"
+	USER   Role = "user"
 )
 
 func (r *Role) Scan(value string) error {
@@ -25,34 +25,34 @@ func (r Role) Value() driver.Value {
 
 // TODO: add default values
 type User struct {
-	gorm.Model    `json:"-"`
+	gorm.Model
 	Name          string         `json:"name"`
 	Email         string         `json:"email"`
 	Password      string         `json:"password"`
-	Type          Role           `json:"type" gorm:"type:role;default:USER"`
+	Type          Role           `json:"type" gorm:"type:role;default:user"`
 	Articles      []Article      `json:"articles" gorm:"foreignKey:UserID"`
 	Subscriptions []Subscription `json:"subscriptions" gorm:"foreignKey:UserID"`
 }
 
 type Article struct {
-	gorm.Model `json:"-"`
+	gorm.Model
 	Title      string         `json:"title"`
 	Content    string         `json:"content"`
 	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 	Comments   []Comment      `json:"comments" gorm:"foreignKey:ArticleID"`
 	CategoryID uint           `json:"category_id"`
-	Category   Category       `json:"category" gorm:"foreignKey:CategoryID"`
+	Category   Category       `json:"-" gorm:"foreignKey:CategoryID"`
 	UserID     uint           `json:"user_id"`
-	User       User           `gorm:"foreignKey:UserID"`
+	User       User           `json:"-" gorm:"foreignKey:UserID"`
 }
 
 type Comment struct {
-	gorm.Model `json:"-"`
-	Content    string  `json:"content"`
-	ArticleID  uint    `json:"article_id"`
-	On         Article `gorm:"foreignKey:ArticleID"`
-	UserID     uint    `json:"user_id"`
-	By         User    `gorm:"foreignKey:UserID"`
+	gorm.Model
+	Content   string  `json:"content"`
+	ArticleID uint    `json:"article_id"`
+	On        Article `gorm:"foreignKey:ArticleID"`
+	UserID    uint    `json:"user_id"`
+	By        User    `gorm:"foreignKey:UserID"`
 }
 
 type Subscription struct {

@@ -32,7 +32,7 @@ func NewAuthService() *Auth {
 
 func (a *Auth) IsAuthor() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if role := ctx.GetHeader("role"); role == "AUTHOR" {
+		if role := ctx.GetHeader("role"); role == string(domain.AUTHOR) {
 			ctx.Next()
 			return
 		}
