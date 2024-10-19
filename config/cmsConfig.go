@@ -23,14 +23,14 @@ func SetupEnv() (cfg AppConfig, err error) {
 		godotenv.Load()
 	}
 
-	httpPort := os.Getenv("HTTP_PORT")
+	httpPort := ":" + os.Getenv("HTTP_PORT")
 
 	if len(httpPort) < 1 {
 		log.Println("HTTP_PORT not found using default port :3000")
 		httpPort = ":3000"
 	}
 
-	Dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", os.Getenv("HOST"), os.Getenv("USER_NAME"), os.Getenv("PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
+	Dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", os.Getenv("DB_HOST"), os.Getenv("USER_NAME"), os.Getenv("PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 
 	if len(Dsn) < 1 {
 		return AppConfig{}, errors.New("DSN variables not found")

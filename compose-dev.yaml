@@ -4,19 +4,19 @@ services:
       context: .
       dockerfile: ./docker/cms/Dockerfile
     ports:
-      - "3000:3000"
-    # for production
-    # env_file:
-    #  - .env
+      - ${HTTP_PORT}:${HTTP_PORT}
+    env_file:
+     - .env
     environment:
-      - HOST=db
-      - DB_PORT=5432
-      - USER_NAME=postgres
-      - DB_NAME=cms
-      - PASSWORD=postgres
-      - SECRET=secret
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - PROMETHEUS_URL=http://prometheus:9090
+      - APP_ENV=dev
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - USER_NAME=${USER_NAME}
+      - DB_NAME=${DB_NAME}
+      - PASSWORD=${PASSWORD}
+      - SECRET=${SECRET}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+      - PROMETHEUS_URL=${PROMETHEUS_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -54,6 +54,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+
   prometheus:
     image: prom/prometheus
     ports:
